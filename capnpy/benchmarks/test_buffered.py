@@ -47,7 +47,7 @@ class TestBuffered(object):
         resp = tmpdir.join('myresponse')
         with resp.open('wb') as f:
             for i in range(self.SIZE):
-                ch = chr(random.randrange(255))
+                ch = chr(random.randrange(255)).encode("latin1")
                 f.write(ch)
         #
         tcpserver = TcpServer(resp)
@@ -62,7 +62,7 @@ class TestBuffered(object):
             tot = 0
             while True:
                 s = f.read(1)
-                if s == '':
+                if s == b'':
                     break
                 tot += len(s)
             return tot
@@ -101,5 +101,5 @@ class TestBuffered(object):
         def open_connection():
             host, port = server.host, server.port
             sock = socket.create_connection((host, port))
-            return sock.makefile()
+            return sock.makefile("rb")
         self.do_benchmark(benchmark, open_connection)

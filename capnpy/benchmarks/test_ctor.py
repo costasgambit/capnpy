@@ -87,7 +87,7 @@ class TestCtor(object):
             pytest.skip('N/A')
         #
         #self._make_big_tree() # uncomment this if you want to regenerate the file
-        s = self.BIG_TREE.read()
+        s = self.BIG_TREE.read("rb")
         tree = schema.Tree.loads(s)
 
         def loop(oldtree):
