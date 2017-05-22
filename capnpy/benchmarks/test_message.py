@@ -25,7 +25,7 @@ class TestLoad(object):
 
     def load_N(self, schema, open_connection):
         f = open_connection()
-        for i in xrange(self.N):
+        for i in range(self.N):
             obj = schema.MyStruct.load(f)
         f.close()
         return obj

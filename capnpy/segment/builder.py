@@ -1,7 +1,12 @@
 import struct
+
+from six import binary_type
+
 from capnpy import ptr
 from capnpy.packing import mychr
 from capnpy.printer import print_buffer
+from capnpy.util import ensure_bytes
+
 
 def round_to_word(pos):
     return (pos + (8 - 1)) & -8  # Round up to 8-byte boundary
@@ -15,7 +20,7 @@ class SegmentBuilder(object):
         return len(self.buf)
 
     def as_string(self):
-        return str(self.buf)
+        return binary_type(self.buf)
 
     def _print(self):
         print_buffer(self.as_string())
@@ -64,7 +69,7 @@ class SegmentBuilder(object):
     def allocate(self, length):
         # XXX: check whether there is a better method to zero-extend the array in PyPy
         result = len(self.buf)
-        self.buf += '\x00'*length
+        self.buf += b'\x00'*length
         return result
 
     def alloc_struct(self, pos, data_size, ptrs_size):
@@ -75,7 +80,7 @@ class SegmentBuilder(object):
         length = (data_size+ptrs_size) * 8
         result = self.allocate(length)
         offet = result - (pos+8)
-        p = ptr.new_struct(offet/8, data_size, ptrs_size)
+        p = ptr.new_struct(offet//8, data_size, ptrs_size)
         self.write_int64(pos, p)
         return result
 
@@ -87,7 +92,7 @@ class SegmentBuilder(object):
         body_length = round_to_word(body_length)
         result = self.allocate(body_length)
         offet = result - (pos+8)
-        p = ptr.new_list(offet/8, size_tag, item_count)
+        p = ptr.new_list(offet//8, size_tag, item_count)
         self.write_int64(pos, p)
         return result
 
@@ -95,6 +100,7 @@ class SegmentBuilder(object):
         if s is None:
             self.write_int64(pos, 0)
             return -1
+        s = ensure_bytes(s)
         n = len(s)
         nn = n + trailing_zero
         result = self.alloc_list(pos, ptr.LIST_SIZE_8, nn, nn)

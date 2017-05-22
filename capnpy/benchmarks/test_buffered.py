@@ -3,7 +3,7 @@ import socket
 import random
 import subprocess
 import time
-from cStringIO import StringIO
+from io import StringIO
 from capnpy.buffered import BufferedStream, BufferedSocket
 
 class TcpServer(object):
@@ -46,7 +46,7 @@ class TestBuffered(object):
         tmpdir = tmpdir_factory.mktemp('buffered')
         resp = tmpdir.join('myresponse')
         with resp.open('wb') as f:
-            for i in xrange(self.SIZE):
+            for i in range(self.SIZE):
                 ch = chr(random.randrange(255))
                 f.write(ch)
         #

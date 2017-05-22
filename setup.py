@@ -13,7 +13,7 @@ else:
         HAS_CYTHON = True
     else:
         HAS_CYTHON = False
-        print 'WARNING: disabling Cython support, needed Cython >= 0.23'
+        print('WARNING: disabling Cython support, needed Cython >= 0.23')
 
 
 USE_CYTHON = os.environ.get('USE_CYTHON', 'auto')
@@ -58,7 +58,7 @@ def get_cython_extensions():
             include_dirs = [capnpy_dir],
             extra_compile_args = extra_compile_args,
         )
-    return cythonize(map(getext, files), gdb_debug=DEBUG)
+    return cythonize(list(map(getext, files)), gdb_debug=DEBUG)
 
 # we try to cythonize() the files even if USE_CYTHON is False; this way, we
 # make sure that the *.c files will be included in the sdist. This is needed

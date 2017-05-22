@@ -17,14 +17,14 @@ from capnpy.compiler.compiler import StandaloneCompiler
 
 
 def decode(args):
-    print >> sys.stderr, 'Loading schema...'
+    print('Loading schema...', file=sys.stderr)
     a = time.time()
     mod = load_schema(args['SCHEMA'],
                       convert_case=args['--convert-case'],
                       pyx=args['--pyx'])
     b = time.time()
-    print >> sys.stderr, 'schema loaded in %.2f secs' % (b-a)
-    print >> sys.stderr, 'decoding stream...'
+    print('schema loaded in %.2f secs' % (b-a), file=sys.stderr)
+    print('decoding stream...', file=sys.stderr)
     cls = getattr(mod, args['CLASS'])
     with open(args['FILE']) as f:
         i = 0
@@ -33,12 +33,12 @@ def decode(args):
                 obj = load(f, cls)
             except ValueError:
                 break
-            print obj.shortrepr()
+            print(obj.shortrepr())
             i += 1
             if i % 10000 == 0:
-                print >> sys.stderr, i
+                print(i, file=sys.stderr)
     c = time.time()
-    print >> sys.stderr, 'stream decoded in %.2f secs' % (c-b)
+    print('stream decoded in %.2f secs' % (c-b), file=sys.stderr)
 
 def compile(args):
     srcfile = args['FILE']

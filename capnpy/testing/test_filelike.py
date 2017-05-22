@@ -1,4 +1,4 @@
-from cStringIO import StringIO
+from io import StringIO
 from capnpy.blob import PYX
 from capnpy.filelike import as_filelike, FileLike
 

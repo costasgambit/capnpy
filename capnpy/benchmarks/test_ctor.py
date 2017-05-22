@@ -76,7 +76,7 @@ class TestCtor(object):
         tree = schema.Tree(make(12))
         with self.BIG_TREE.open('w') as f:
             tree.dump(f)
-        print 'big tree wrote to ', self.BIG_TREE
+        print('big tree wrote to ', self.BIG_TREE)
 
     @pytest.mark.benchmark(group="copy_pointer")
     def test_copy_pointer(self, schema, benchmark):

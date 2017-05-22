@@ -63,7 +63,7 @@ class Node:
         name = self.displayName[self.displayNamePrefixLength:]
         if self.is_file():
             filename = self.displayName
-            return m.importnames[filename]
+            name = m.importnames[filename]
         return name
 
     def _fullname(self, m, sep):

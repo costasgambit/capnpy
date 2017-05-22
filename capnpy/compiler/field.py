@@ -149,7 +149,7 @@ class Field__Slot:
             {cpdef} get_{name}(self):
                 res = self.{name}
                 if res is None:
-                    return {structcls}.from_buffer('', 0, data_size=0, ptrs_size=0)
+                    return {structcls}.from_buffer(b'', 0, data_size=0, ptrs_size=0)
                 return res
         """)
         ns.w()
@@ -167,7 +167,7 @@ class Field__Slot:
             {cpdef} get_{name}(self):
                 res = self.{name}
                 if res is None:
-                    return _List.from_buffer('', 0, 0, 0, {list_item_type})
+                    return _List.from_buffer(b'', 0, 0, 0, {list_item_type})
                 return res
         """)
         ns.w()

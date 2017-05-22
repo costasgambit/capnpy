@@ -13,7 +13,7 @@ if IS_PYPY:
     # is not a tracing-time constant (it becomes constant later, during
     # optimizeopt). The work around is to use mychr, which pyjitpl.py is smart
     # enough to detect as a tracing-time constant.
-    _CHR = tuple(map(chr, range(256)))
+    _CHR = tuple(map(chr, list(range(256))))
     def mychr(i):
         return _CHR[i]
 
@@ -49,7 +49,7 @@ def pack_into(ifmt, buf, offset, value):
     fmt = '<' + mychr(ifmt)
     try:
         struct.pack_into(fmt, buf, offset, value)
-    except struct.error, e:
+    except struct.error as e:
         raise IndexError(e)
 
 def pack_int64_into(buf, offset, value):

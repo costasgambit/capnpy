@@ -1,7 +1,10 @@
+import six
+
 from capnpy import ptr
 from capnpy.printer import print_buffer
 from capnpy.visit import end_of, is_compact
 from capnpy.segment.segment import Segment
+from six import b
 
 class TestEndOf(object):
 
@@ -11,7 +14,7 @@ class TestEndOf(object):
         return end_of(buf, p, offset-8)
 
     def test_struct_data(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                'garbage1'
                '\x01\x00\x00\x00\x00\x00\x00\x00'  # 1
                '\x02\x00\x00\x00\x00\x00\x00\x00') # 2
@@ -29,7 +32,7 @@ class TestEndOf(object):
         ##   a @1 :Point;
         ##   b @2 :Point;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
                '\x0c\x00\x00\x00\x02\x00\x00\x00'    # ptr to a
                '\x10\x00\x00\x00\x02\x00\x00\x00'    # ptr to b
@@ -44,7 +47,7 @@ class TestEndOf(object):
         assert end == 80
 
     def test_struct_one_null_ptr(self):
-        buf = ('\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
+        buf = b('\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
                '\x0c\x00\x00\x00\x02\x00\x00\x00'    # ptr to a
                '\x00\x00\x00\x00\x00\x00\x00\x00'    # ptr to b, NULL
                'garbage1'
@@ -56,7 +59,7 @@ class TestEndOf(object):
         assert end == 56
 
     def test_struct_all_null_ptrs(self):
-        buf = ('\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
+        buf = b('\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
                '\x00\x00\x00\x00\x00\x00\x00\x00'    # ptr to a, NULL
                '\x00\x00\x00\x00\x00\x00\x00\x00')   # ptr to b, NULL
         end = self.end_of(buf, 0, data_size=1, ptrs_size=2)
@@ -64,7 +67,7 @@ class TestEndOf(object):
         assert end == 24
 
     def test_list_primitive(self):
-        buf = ('\x0d\x00\x00\x00\x1a\x00\x00\x00'   #  0: ptr list<8>  to a
+        buf = b('\x0d\x00\x00\x00\x1a\x00\x00\x00'   #  0: ptr list<8>  to a
                '\x0d\x00\x00\x00\x1b\x00\x00\x00'   #  8: ptr list<16> to b
                '\x0d\x00\x00\x00\x1c\x00\x00\x00'   # 16: ptr list<32> to c
                '\x11\x00\x00\x00\x1d\x00\x00\x00'   # 24: ptr list<64> to d
@@ -86,7 +89,7 @@ class TestEndOf(object):
         assert end_d == 64 + (3*8)
 
     def test_list_of_bool(self):
-        buf = ('garbage1'
+        buf = b('garbage1'
                '\x01\x00\x00\x00\x19\x00\x00\x00'    # ptrlist
                '\x03\x00\x00\x00\x00\x00\x00\x00')   # [True, True, False]
         end = self.end_of(buf, 8, data_size=0, ptrs_size=1)
@@ -98,7 +101,7 @@ class TestEndOf(object):
         ##   y @1 :Int64;
         ##   name @2 :Text;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x4f\x00\x00\x00'   # ptr to list
                '\x0c\x00\x00\x00\x02\x00\x01\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # points[0].x == 1
@@ -117,7 +120,7 @@ class TestEndOf(object):
         end = self.end_of(buf, 8, data_size=0, ptrs_size=1)
         #assert start == 16  # XXX
         assert end == 120
-        assert buf[end:] == 'garbage1'
+        assert buf[end:] == b'garbage1'
 
     def test_list_composite_one_null_ptr(self):
         ## struct Point {
@@ -125,7 +128,7 @@ class TestEndOf(object):
         ##   y @1 :Int64;
         ##   name @2 :Text;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x4f\x00\x00\x00'   # ptr to list
                '\x0c\x00\x00\x00\x02\x00\x01\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # points[0].x == 1
@@ -143,7 +146,7 @@ class TestEndOf(object):
         end = self.end_of(buf, 8, data_size=0, ptrs_size=1)
         #assert start == 16  # XXX
         assert end == 112
-        assert buf[end:] == 'garbage1'
+        assert buf[end:] == b'garbage1'
 
     def test_list_composite_all_null_ptrs(self):
         ## struct Point {
@@ -151,7 +154,7 @@ class TestEndOf(object):
         ##   y @1 :Int64;
         ##   name @2 :Text;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x4f\x00\x00\x00'   # ptr to list
                '\x0c\x00\x00\x00\x02\x00\x01\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # points[0].x == 1
@@ -167,10 +170,10 @@ class TestEndOf(object):
         end = self.end_of(buf, 8, data_size=0, ptrs_size=1)
         #assert start == 16  # XXX
         assert end == 96
-        assert buf[end:] == 'garbage1'
+        assert buf[end:] == b'garbage1'
 
     def test_list_composite_no_ptr(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x27\x00\x00\x00'   # ptr to list
                '\x08\x00\x00\x00\x02\x00\x00\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # p[0].x == 1
@@ -182,10 +185,10 @@ class TestEndOf(object):
         end = self.end_of(buf, 8, data_size=0, ptrs_size=1)
         #assert start == 16  # XXX
         assert end == 56
-        assert buf[end:] == 'garbage1garbage2'
+        assert buf[end:] == b'garbage1garbage2'
 
     def test_list_of_pointers(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x1e\x00\x00\x00'   # ptr to list
                '\x09\x00\x00\x00\x32\x00\x00\x00'   # strings[0] == ptr to #0
                '\x09\x00\x00\x00\x52\x00\x00\x00'   # strings[1] == ptr to #1
@@ -201,10 +204,10 @@ class TestEndOf(object):
         # note that the end if 88, not 86: the last two \x00\x00 are not counted,
         # because they are padding, not actual data
         assert end == 86
-        assert buf[end:] == '\x00\x00'
+        assert buf[end:] == b'\x00\x00'
 
     def test_list_of_pointers_all_null(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x1e\x00\x00\x00'   # ptr to list
                '\x00\x00\x00\x00\x00\x00\x00\x00'
                '\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -215,7 +218,7 @@ class TestEndOf(object):
         # note that the end if 88, not 86: the last two \x00\x00 are not counted,
         # because they are padding, not actual data
         assert end == 40
-        assert buf[end:] == 'garbage1'
+        assert buf[end:] == b'garbage1'
 
 
 class TestIsCompact(object):
@@ -231,7 +234,7 @@ class TestIsCompact(object):
         return is_compact(buf, p, offset-8)
 
     def test_struct_data_only(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                'garbage1'
                '\x01\x00\x00\x00\x00\x00\x00\x00'  # 1
                '\x02\x00\x00\x00\x00\x00\x00\x00') # 2
@@ -249,7 +252,7 @@ class TestIsCompact(object):
         ##   a @1 :Point;
         ##   b @2 :Point;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
                '\x0c\x00\x00\x00\x02\x00\x00\x00'    # ptr to a
                '\x10\x00\x00\x00\x02\x00\x00\x00'    # ptr to b
@@ -263,7 +266,7 @@ class TestIsCompact(object):
         assert not is_compact
 
     def test_struct_ptrs_compact(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
                '\x04\x00\x00\x00\x02\x00\x00\x00'    # ptr to a
                '\x08\x00\x00\x00\x02\x00\x00\x00'    # ptr to b
@@ -275,21 +278,21 @@ class TestIsCompact(object):
         assert is_compact
 
     def test_struct_all_null_ptrs(self):
-        buf = ('\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
+        buf = b('\x01\x00\x00\x00\x00\x00\x00\x00'    # color == 1
                '\x00\x00\x00\x00\x00\x00\x00\x00'    # ptr to a, NULL
                '\x00\x00\x00\x00\x00\x00\x00\x00')   # ptr to b, NULL
         is_compact = self.is_compact(buf, 0, ptr.STRUCT, data_size=1, ptrs_size=2)
         assert is_compact
 
     def test_list_primitive(self):
-        buf = '\x01\x02\x03\x00\x00\x00\x00\x00'   # 32: list<8> [1, 2, 3]
+        buf = b'\x01\x02\x03\x00\x00\x00\x00\x00'   # 32: list<8> [1, 2, 3]
         is_compact = self.is_compact(buf, 0, ptr.LIST,
                                      size_tag=ptr.LIST_SIZE_8,
                                      item_count=3)
         assert is_compact
 
     def test_list_of_bool(self):
-        buf = '\x03\x00\x00\x00\x00\x00\x00\x00'   # [True, True, False]
+        buf = b'\x03\x00\x00\x00\x00\x00\x00\x00'   # [True, True, False]
         is_compact = self.is_compact(buf, 0, ptr.LIST,
                                      size_tag=ptr.LIST_SIZE_BIT,
                                      item_count=3)
@@ -301,7 +304,7 @@ class TestIsCompact(object):
         ##   y @1 :Int64;
         ##   name @2 :Text;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x0c\x00\x00\x00\x02\x00\x01\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # points[0].x == 1
                '\x02\x00\x00\x00\x00\x00\x00\x00'   # points[0].y == 2
@@ -327,7 +330,7 @@ class TestIsCompact(object):
         ##   y @1 :Int64;
         ##   name @2 :Text;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x0c\x00\x00\x00\x02\x00\x01\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # points[0].x == 1
                '\x02\x00\x00\x00\x00\x00\x00\x00'   # points[0].y == 2
@@ -355,7 +358,7 @@ class TestIsCompact(object):
         ##   y @1 :Int64;
         ##   name @2 :Text;
         ## }
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x0c\x00\x00\x00\x02\x00\x01\x00'   # list tag
                '\x01\x00\x00\x00\x00\x00\x00\x00'   # points[0].x == 1
                '\x02\x00\x00\x00\x00\x00\x00\x00'   # points[0].y == 2
@@ -373,7 +376,7 @@ class TestIsCompact(object):
         assert is_compact
 
     def test_list_of_pointers_compact(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x09\x00\x00\x00\x32\x00\x00\x00'   # strings[0] == ptr to #0
                '\x09\x00\x00\x00\x52\x00\x00\x00'   # strings[1] == ptr to #1
                '\x0d\x00\x00\x00\xb2\x00\x00\x00'   # strings[2] == ptr to #2
@@ -389,7 +392,7 @@ class TestIsCompact(object):
         assert is_compact
 
     def test_list_of_pointers_not_compact(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x0d\x00\x00\x00\x32\x00\x00\x00'   # strings[0] == ptr to #0
                '\x0d\x00\x00\x00\x52\x00\x00\x00'   # strings[1] == ptr to #1
                '\x11\x00\x00\x00\xb2\x00\x00\x00'   # strings[2] == ptr to #2
@@ -406,7 +409,7 @@ class TestIsCompact(object):
         assert not is_compact
 
     def test_list_of_pointers_all_null(self):
-        buf = ('garbage0'
+        buf = b('garbage0'
                '\x00\x00\x00\x00\x00\x00\x00\x00'
                '\x00\x00\x00\x00\x00\x00\x00\x00'
                '\x00\x00\x00\x00\x00\x00\x00\x00'

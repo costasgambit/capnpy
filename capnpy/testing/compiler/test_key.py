@@ -123,8 +123,8 @@ class TestFashHash(CompilerTest):
         """
         mod = self.compile(schema)
         self.only_fasthash(mod.Point)
-        p1 = mod.Point(1, sys.maxint+1, "p1")
-        assert hash(p1) == hash((1, sys.maxint+1))
+        p1 = mod.Point(1, sys.maxsize+1, "p1")
+        assert hash(p1) == hash((1, sys.maxsize+1))
 
     def test_fasthash_string(self):
         schema = """

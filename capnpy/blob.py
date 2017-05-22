@@ -5,8 +5,10 @@
 
 import sys
 from pypytools import IS_PYPY
+from six import binary_type
+
 import capnpy
-from capnpy.util import extend
+from capnpy.util import extend, ensure_bytes
 from capnpy.printer import BufferPrinter
 from capnpy.segment.segment import Segment
 
@@ -18,7 +20,7 @@ else:
     PYX = cython.compiled
 
 if not IS_PYPY and not PYX:
-    print >> sys.stderr, 'WARNING: capnpy was not compiled correctly, PYX mode disabled'
+    print('WARNING: capnpy was not compiled correctly, PYX mode disabled', file=sys.stderr)
 
 
 class Blob(object):
@@ -38,7 +40,7 @@ class Blob(object):
 
     def _init_blob(self, seg):
         assert seg is not None
-        if isinstance(seg, str):
+        if isinstance(seg, binary_type):
             seg = Segment(seg)
         self._seg = seg
 
@@ -88,7 +90,7 @@ class Blob(object):
         return not self._equals(other)
 
     def _cmp_error(self, other):
-        raise TypeError, "capnpy structs can be compared only for equality"
+        raise TypeError("capnpy structs can be compared only for equality")
 
     def _richcmp(self, other, op):
         if op == 2:

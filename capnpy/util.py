@@ -20,9 +20,24 @@ def magic_setattr(cls, attr, value):
                             "Run setup.py to compile capnpy._utils and enable the hack")
 
 
+PY3 = sys.version_info >= (3, 0)
+
+
+def ensure_unicode(s):
+    if isinstance(s, bytes):
+        return s.decode("utf8")
+    return s
+
+
+def ensure_bytes(b):
+    if isinstance(b, str):
+        return b.encode("utf8")
+    return b
+
+
 def extend(cls):
     def decorator(new_class):
-        for key, value in new_class.__dict__.iteritems():
+        for key, value in new_class.__dict__.items():
             if key not in ('__dict__', '__doc__', '__module__', '__weakref__'):
                 magic_setattr(cls, key, value)
         return cls
@@ -60,7 +75,7 @@ def extend_module_maybe(globals, filename=None, modname=None):
     #
     src = extmod.read()
     code = compile(src, str(extmod), 'exec')
-    exec code in globals
+    exec(code, globals)
 
 def text_repr(s):
     # abuse the python string repr algo: make sure that the string contains at
@@ -69,7 +84,7 @@ def text_repr(s):
     # non-ascii chars and single quotes. Then, we manually escape the double
     # quotes and put everything inside double quotes
     #
-    s = s + "'" + '"'
+    s = ensure_unicode(s) + "'" + '"'
     s = repr(s)[1:-4] # remove the single quotes around the string, plus the
                       # extra quotes we added above
     s = s.replace('"', r'\"')

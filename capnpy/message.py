@@ -144,7 +144,7 @@ def dumps(obj):
         builder.allocate(16) # reserve space for segment header+the root pointer
         builder.copy_from_struct(8, Struct, obj)
         segment_count = 1
-        segment_size = (builder.get_length()-8) / 8 # subtract the segment header
+        segment_size = (builder.get_length()-8) // 8 # subtract the segment header
                                                     # and convert to words
         builder.write_uint32(0, segment_count - 1)
         builder.write_uint32(4, segment_size)

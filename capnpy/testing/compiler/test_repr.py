@@ -2,8 +2,20 @@
 
 import py
 import pytest
+from six import b, iterbytes, int2byte
+
 import capnpy
 from capnpy.testing.compiler.support import CompilerTest
+from capnpy.util import ensure_unicode
+
+
+# def double_escape(s):
+#     cs = []
+#     for c in iterbytes(s):
+#         if c >= 128:
+#             cs.append(b"\\")
+#         cs.append(int2byte(c))
+#     return b"".join(cs)
 
 
 class TestShortRepr(CompilerTest):
@@ -18,11 +30,16 @@ class TestShortRepr(CompilerTest):
         ret = proc.wait()
         if ret != 0:
             raise ValueError(stderr)
-        return stdout.strip()
+        return ensure_unicode(stdout.strip())
 
     def check(self, obj, expected=None):
         myrepr = obj.shortrepr()
         capnp_repr = self.decode(obj)
+        print("A", capnp_repr)
+        # Terrible hacks are terrible :(
+        capnp_repr = capnp_repr.replace(r"\"", "\\\\\"").replace(r"\'", "\\\\\'")
+        capnp_repr = capnp_repr.encode("latin1").decode("unicode-escape").encode("latin1").decode("utf8")
+        print(myrepr, capnp_repr)
         assert myrepr == capnp_repr
         if expected is not None:
             assert myrepr == expected
@@ -49,7 +66,7 @@ class TestShortRepr(CompilerTest):
         }
         """
         self.mod = self.compile(schema)
-        buf = '\x01\x00\x00\x00\x00\x00\x00\x00'
+        buf = b'\x01\x00\x00\x00\x00\x00\x00\x00'
         p = self.mod.P.from_buffer(buf, 0, 1, 0)
         self.check(p, '(x = true, y = false)')
 
@@ -67,7 +84,7 @@ class TestShortRepr(CompilerTest):
         }
         """
         self.mod = self.compile(schema)
-        buf = '\x01\x00\x00\x00\x00\x00\x00\x00'
+        buf = b'\x01\x00\x00\x00\x00\x00\x00\x00'
         p = self.mod.P.from_buffer(buf, 0, 1, 0)
         self.check(p, '(x = green, y = red)')
 
@@ -121,8 +138,8 @@ class TestShortRepr(CompilerTest):
         p = self.mod.P(txt="tricky \" '")
         self.check(p, r'(txt = "tricky \" \'")')
         #
-        p = self.mod.P(txt=u'hellò'.encode('utf-8'))
-        self.check(p, r'(txt = "hell\xc3\xb2")')
+        p = self.mod.P(txt='hellò'.encode('utf-8'))
+        self.check(p, r'(txt = "hellò")')
 
     def test_data_special_chars(self):
         schema = """
@@ -141,8 +158,8 @@ class TestShortRepr(CompilerTest):
         p = self.mod.P(data="tricky \" '")
         self.check(p, r'(data = "tricky \" \'")')
         #
-        p = self.mod.P(data=u'hellò'.encode('utf-8'))
-        self.check(p, r'(data = "hell\xc3\xb2")')
+        p = self.mod.P(data='hellò'.encode('utf-8'))
+        self.check(p, r'(data = "hellò")')
 
     def test_struct(self):
         schema = """
@@ -198,7 +215,7 @@ class TestShortRepr(CompilerTest):
         self.mod = self.compile(schema)
         # at the moment of writing, List(Bool) is not supported by ctors, so
         # we create one from the buffer
-        buf = ('\x01\x00\x00\x00\x19\x00\x00\x00'    # ptrlist
+        buf = b('\x01\x00\x00\x00\x19\x00\x00\x00'    # ptrlist
                '\x03\x00\x00\x00\x00\x00\x00\x00')
         f = self.mod.Foo.from_buffer(buf, 0, 0, 1)
         self.check(f, "(items = [true, true, false])")
@@ -214,7 +231,7 @@ class TestShortRepr(CompilerTest):
         }
         """
         self.mod = self.compile(schema)
-        buf = ('\x01\x00\x00\x00\x00\x00\x00\x00'  # 1
+        buf = b('\x01\x00\x00\x00\x00\x00\x00\x00'  # 1
                '\x02\x00\x00\x00\x00\x00\x00\x00') # 2
         p = self.mod.P.from_buffer(buf, 0, 2, 0)
         self.check(p, '(foo = (x = 1, y = 2))')
@@ -257,25 +274,25 @@ class TestShortRepr(CompilerTest):
         }
         """
         self.mod = self.compile(schema)
-        buf = ('\x00\x00\x00\x00\x00\x00\x00\x00'  # tag == a
+        buf = b('\x00\x00\x00\x00\x00\x00\x00\x00'  # tag == a
                '\x00\x00\x00\x00\x00\x00\x00\x00') # null ptr
         p = self.mod.P.from_buffer(buf, 0, 1, 1)
         assert p.is_a()
         self.check(p, '()') # the default value is always empty
         #
-        buf = ('\x01\x00\x00\x00\x00\x00\x00\x00'  # tag == b
+        buf = b('\x01\x00\x00\x00\x00\x00\x00\x00'  # tag == b
                '\x00\x00\x00\x00\x00\x00\x00\x00') # null ptr
         p = self.mod.P.from_buffer(buf, 0, 1, 1)
         assert p.is_b()
         self.check(p, '(b = (x = 0, y = 0))')
         #
-        buf = ('\x02\x00\x00\x00\x00\x00\x00\x00'  # tag == c
+        buf = b('\x02\x00\x00\x00\x00\x00\x00\x00'  # tag == c
                '\x00\x00\x00\x00\x00\x00\x00\x00') # null ptr
         p = self.mod.P.from_buffer(buf, 0, 1, 1)
         assert p.is_c()
         self.check(p, '(c = "")')
         #
-        buf = ('\x03\x00\x00\x00\x00\x00\x00\x00'  # tag == d
+        buf = b('\x03\x00\x00\x00\x00\x00\x00\x00'  # tag == d
                '\x00\x00\x00\x00\x00\x00\x00\x00') # null ptr
         p = self.mod.P.from_buffer(buf, 0, 1, 1)
         assert p.is_d()

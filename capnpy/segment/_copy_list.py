@@ -13,10 +13,10 @@ if not cython.compiled:
     from capnpy.list import ItemType, StructItemType
 
 @cython.ccall
-@cython.locals(builder=SegmentBuilder, pos=long, item_type=ItemType,
-               item_length=long, size_tag=long, item_count=long, body_length=long,
+@cython.locals(builder=SegmentBuilder, pos=int, item_type=ItemType,
+               item_length=int, size_tag=int, item_count=int, body_length=int,
                struct_item_type=StructItemType,
-               data_size=long, ptrs_size=long, total_words=long, tag=long)
+               data_size=int, ptrs_size=int, total_words=int, tag=int)
 def copy_from_list(builder, pos, item_type, lst):
     if lst is None:
         builder.write_int64(pos, 0)
