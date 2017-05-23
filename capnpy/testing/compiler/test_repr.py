@@ -1,12 +1,12 @@
 # -*- encoding: utf-8 -*-
-
+from __future__ import print_function
 import py
 import pytest
 from six import b, iterbytes, int2byte
 
 import capnpy
 from capnpy.testing.compiler.support import CompilerTest
-from capnpy.util import ensure_unicode
+from capnpy.util import ensure_unicode, PY3
 
 
 # def double_escape(s):
@@ -30,15 +30,20 @@ class TestShortRepr(CompilerTest):
         ret = proc.wait()
         if ret != 0:
             raise ValueError(stderr)
-        return ensure_unicode(stdout.strip())
+        out = stdout.strip()
+        if PY3:
+            return ensure_unicode(out)
+        return out
 
     def check(self, obj, expected=None):
         myrepr = obj.shortrepr()
         capnp_repr = self.decode(obj)
         print("A", capnp_repr)
+        # This is most certainly wrong, and is a discrepancy between py2/3!
         # Terrible hacks are terrible :(
-        capnp_repr = capnp_repr.replace(r"\"", "\\\\\"").replace(r"\'", "\\\\\'")
-        capnp_repr = capnp_repr.encode("latin1").decode("unicode-escape").encode("latin1").decode("utf8")
+        if PY3:
+            capnp_repr = capnp_repr.replace(r"\"", "\\\\\"").replace(r"\'", "\\\\\'")
+            capnp_repr = capnp_repr.encode("latin1").decode("unicode-escape").encode("latin1").decode("utf8")
         print(myrepr, capnp_repr)
         assert myrepr == capnp_repr
         if expected is not None:
@@ -138,7 +143,7 @@ class TestShortRepr(CompilerTest):
         p = self.mod.P(txt="tricky \" '")
         self.check(p, r'(txt = "tricky \" \'")')
         #
-        p = self.mod.P(txt='hellò'.encode('utf-8'))
+        p = self.mod.P(txt=u'hellò'.encode('utf-8'))
         self.check(p, r'(txt = "hellò")')
 
     def test_data_special_chars(self):
@@ -158,7 +163,7 @@ class TestShortRepr(CompilerTest):
         p = self.mod.P(data="tricky \" '")
         self.check(p, r'(data = "tricky \" \'")')
         #
-        p = self.mod.P(data='hellò'.encode('utf-8'))
+        p = self.mod.P(data=u'hellò'.encode('utf-8'))
         self.check(p, r'(data = "hellò")')
 
     def test_struct(self):

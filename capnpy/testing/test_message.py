@@ -1,7 +1,8 @@
+from __future__ import print_function
 import py.test
 from io import BytesIO
 
-from six import b
+from six import b, PY3
 
 from capnpy.message import load, loads, load_all, _load_message, dumps
 from capnpy.filelike import as_filelike
@@ -222,7 +223,7 @@ class TestFileLike(object):
     def test_file(self, tmpdir):
         myfile = tmpdir.join('myfile')
         myfile.write(self.buf)
-        with myfile.open(mode="br") as f:
+        with myfile.open(mode="rb" if PY3 else "r") as f:
             self.check(f)
 
     def test_socket(self):

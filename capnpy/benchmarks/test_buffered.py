@@ -4,6 +4,9 @@ import random
 import subprocess
 import time
 from io import StringIO
+
+import six
+
 from capnpy.buffered import BufferedStream, BufferedSocket
 
 class TcpServer(object):
@@ -47,7 +50,7 @@ class TestBuffered(object):
         resp = tmpdir.join('myresponse')
         with resp.open('wb') as f:
             for i in range(self.SIZE):
-                ch = chr(random.randrange(255)).encode("latin1")
+                ch = six.int2byte(random.randrange(255))
                 f.write(ch)
         #
         tcpserver = TcpServer(resp)

@@ -1,6 +1,9 @@
 import sys
 import py
 import imp
+
+import six
+
 try:
     from capnpy._util import setattr_builtin
 except ImportError:
@@ -24,13 +27,13 @@ PY3 = sys.version_info >= (3, 0)
 
 
 def ensure_unicode(s):
-    if isinstance(s, bytes):
+    if isinstance(s, six.binary_type):
         return s.decode("utf8")
     return s
 
 
 def ensure_bytes(b):
-    if isinstance(b, str):
+    if isinstance(b, six.text_type):
         return b.encode("utf8")
     return b
 
@@ -84,7 +87,11 @@ def text_repr(s):
     # non-ascii chars and single quotes. Then, we manually escape the double
     # quotes and put everything inside double quotes
     #
-    s = ensure_unicode(s) + "'" + '"'
+
+    if PY3:
+        s = ensure_unicode(s)
+
+    s = s + "'" + '"'
     s = repr(s)[1:-4] # remove the single quotes around the string, plus the
                       # extra quotes we added above
     s = s.replace('"', r'\"')

@@ -2,7 +2,7 @@ import capnpy
 from capnpy import ptr
 from capnpy.type import Types
 from capnpy.blob import Blob
-from capnpy.util import ensure_unicode
+from capnpy.util import ensure_unicode, PY3
 from capnpy.visit import end_of, is_compact
 from capnpy.list import List
 from capnpy.packing import pack_int64
@@ -182,7 +182,10 @@ class Struct(Blob):
         return obj
 
     def _read_str_text(self, offset, default_=None):
-        return ensure_unicode(self._read_str_data(offset, default_, additional_size=-1))
+        res = self._read_str_data(offset, default_, additional_size=-1)
+        if PY3:
+            res = ensure_unicode(res)
+        return res
 
     def _hash_str_text(self, offset, default_=hash(None)):
         return self._hash_str_data(offset, default_, additional_size=-1)

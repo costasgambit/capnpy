@@ -3,6 +3,7 @@
 #   - size: they are always expressed in WORDS
 #   - length: they are always expressed in BYTES
 
+from __future__ import print_function
 import sys
 from pypytools import IS_PYPY
 from six import binary_type

@@ -6,7 +6,7 @@ Options:
   --no-convert-case    Don't convert camelCase to camel_case
   --no-pyx             Always produce a .py file, even if Cython is available
 """
-
+from __future__ import print_function
 import sys
 import py
 import time

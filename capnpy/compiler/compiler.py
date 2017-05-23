@@ -1,4 +1,4 @@
-
+from __future__ import absolute_import, print_function
 import py
 import sys
 import os
@@ -10,7 +10,7 @@ from capnpy import schema
 from capnpy.message import loads
 from capnpy.blob import PYX
 from capnpy.compiler.module import ModuleGenerator
-from capnpy.util import ensure_unicode
+from capnpy.util import ensure_unicode, PY3
 
 PKGDIR = py.path.local(capnpy.__file__).dirpath()
 
@@ -86,7 +86,11 @@ class BaseCompiler(object):
 
     def _capnp_check_version(self):
         version = self._exec('capnp', '--version')
-        version = ensure_unicode(version).strip()
+
+        if PY3:
+            version = ensure_unicode(version)
+
+        version = version.strip()
         if not version.startswith("Cap'n Proto version"):
             raise CompilerError("capnp version string not recognized: %s" % version)
         _, version = version.rsplit(' ', 1)

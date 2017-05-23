@@ -2,7 +2,7 @@ import py
 from datetime import datetime
 from capnpy import schema
 from capnpy.type import Types
-from capnpy.util import ensure_unicode
+from capnpy.util import ensure_unicode, PY3
 
 
 @schema.CodeGeneratorRequest.__extend__
@@ -23,6 +23,10 @@ class RequestedFile:
 
     def emit(self, m):
         m.modname = py.path.local(ensure_unicode(self.filename)).purebasename
+
+        if not PY3:
+            m.modname = m.modname.encode("utf8")
+
         m.tmpname = '%s_tmp' % m.modname
         m.code.global_scope.extname = '%s_extended' % m.modname
         #

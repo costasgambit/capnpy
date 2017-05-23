@@ -4,7 +4,7 @@ from capnpy.filelike import as_filelike, FileLike
 
 
 def test_as_filelike():
-    buf = StringIO('hello world')
+    buf = StringIO(u'hello world')
     f = as_filelike(buf)
     if PYX:
         assert isinstance(f, FileLike)

@@ -3,7 +3,7 @@ import sys
 import struct
 import math
 from pypytools import IS_PYPY
-from six import b
+from six import b, PY3
 
 from capnpy import ptr
 from capnpy.printer import print_buffer
@@ -73,7 +73,10 @@ class TestBaseSegment(object):
         #
         val = s.read_uint64_magic(8)
         assert val == sys.maxsize+1 == s.read_uint64(8)
-        assert type(val) is int
+        if PY3:
+            assert type(val) is int
+        else:
+            assert type(val) is long
 
     def test_read_primitive(self):
         buf = struct.pack('Q', 0x1234567887654321)

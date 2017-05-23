@@ -44,7 +44,10 @@ class TestUnpack(object):
         buf = struct.pack('Q', sys.maxsize+1)
         val = unpack_primitive(ord('Q'), buf, 0)
         assert val == sys.maxsize+1
-        assert type(val) is int
+        if six.PY3:
+            assert type(val) is int
+        else:
+            assert type(val) is long
 
     def test_bytearray(self):
         buf = bytearray(struct.pack('q', 42))
