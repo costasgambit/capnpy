@@ -182,9 +182,14 @@ class Struct(Blob):
         return obj
 
     def _read_str_text(self, offset, default_=None):
+        return self._read_str_data(offset, default_, additional_size=-1)
+
+    def _read_str_identifier(self, offset, default_=None):
+        # We're introspecting an identifier name, which in Python 2 is a string,
+        # but in Python 3 has to be a unicode object.
         res = self._read_str_data(offset, default_, additional_size=-1)
         if PY3:
-            res = ensure_unicode(res)
+            return ensure_unicode(res)
         return res
 
     def _hash_str_text(self, offset, default_=hash(None)):

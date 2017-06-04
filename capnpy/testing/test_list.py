@@ -89,7 +89,7 @@ def test_string():
            b'hello capnproto\0')                 # string
     blob = Struct.from_buffer(buf, 0, data_size=0, ptrs_size=1)
     s = blob._read_str_text(0)
-    assert s =='hello capnproto'
+    assert s == b'hello capnproto'
 
 def test_string_with_offset():
     buf = (b'abcd'                               # some random garbage
@@ -97,7 +97,7 @@ def test_string_with_offset():
            b'hello capnproto\0')                 # string
     blob = Struct.from_buffer(buf, 4, data_size=0, ptrs_size=1)
     s = blob._read_str_text(0)
-    assert s == 'hello capnproto'
+    assert s == b'hello capnproto'
 
 def test_data_string():
     buf = b('\x01\x00\x00\x00\x42\x00\x00\x00'   # ptrlist
